@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Modal } from 'react-bootstrap';
+import {Modal} from 'react-bootstrap';
+const token = localStorage.getItem('token');
+
+axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
 function Jurusan() {
   const [jurusan, setJurusan] = useState([]);
@@ -15,9 +18,17 @@ function Jurusan() {
   }, []);
 
   const fetchData = async () => {
+
+    try{
+      const headers ={
+        Authorization: `Bearer ${token}`,
+      }
     const response = await axios.get('http://localhost:5000/api/jurusan');
     const data = await response.data.data;
     setJurusan(data);
+    } catch (error){
+      console.error('Gagal mengambil data:', error);
+    }
   };
 
   const handleShow = () => {
@@ -53,12 +64,17 @@ function Jurusan() {
     };
 
     try {
-      await axios.post('http://localhost:5000/api/jurusan/store', data);
+      await axios.post('http://localhost:5000/api/jurusan/store', data, {
+          headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, 
+          },
+      });
       fetchData();
       handleClose();
     } catch (error) {
       console.error('Kesalahan: ', error);
-    }
+}
   };
 
   const handleUpdate = async () => {
@@ -67,7 +83,12 @@ function Jurusan() {
     };
 
     try {
-      await axios.patch(`http://localhost:5000/api/jurusan/update/${editData.id_j}`, data);
+      await axios.patch(`http://localhost:5000/api/jurusan/update/${editData.id_j}`, data, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
       fetchData();
       handleCloseEditModal();
     } catch (error) {
@@ -77,7 +98,12 @@ function Jurusan() {
 
   const handleDelete = async (id_j) => {
     try {
-      await axios.delete(`http://localhost:5000/api/jurusan/delete/${id_j}`);
+      await axios.delete(`http://localhost:5000/api/jurusan/delete/${id_j}`, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    });
       fetchData();
     } catch (error) {
       console.error('Gagal menghapus data:', error);
